@@ -363,7 +363,9 @@ fn position_countdown_bubble(panel: &NSPanel, tray_anchor: Option<NSRect>) {
         |bottom_y| {
             (bottom_y - COUNTDOWN_BUBBLE_SIZE.height - TRAY_BUBBLE_GAP).clamp(
                 visible.origin.y + SCREEN_MARGIN,
-                visible.origin.y + visible.size.height - COUNTDOWN_BUBBLE_SIZE.height - SCREEN_MARGIN,
+                visible.origin.y + visible.size.height
+                    - COUNTDOWN_BUBBLE_SIZE.height
+                    - SCREEN_MARGIN,
             )
         },
     );

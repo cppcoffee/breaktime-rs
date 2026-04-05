@@ -181,8 +181,12 @@ fn next_tray_icon_wake(
     let exact_next_wake = if remaining_steps <= 1 {
         deadline
     } else {
-        let nanos = total_duration.as_nanos().saturating_mul(u128::from(remaining_steps - 1)) / u128::from(TRAY_ICON_TOTAL_STEPS);
-        let next_boundary_from_deadline = Duration::from_nanos(nanos.min(u128::from(u64::MAX)) as u64);
+        let nanos = total_duration
+            .as_nanos()
+            .saturating_mul(u128::from(remaining_steps - 1))
+            / u128::from(TRAY_ICON_TOTAL_STEPS);
+        let next_boundary_from_deadline =
+            Duration::from_nanos(nanos.min(u128::from(u64::MAX)) as u64);
         deadline - next_boundary_from_deadline
     };
 
