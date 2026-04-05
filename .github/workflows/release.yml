@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  APP_NAME: BreakTime
+  BINARY_NAME: breaktime
+  BUNDLE_ID: ${{ vars.BREAKTIME_BUNDLE_ID != '' && vars.BREAKTIME_BUNDLE_ID || 'com.example.breaktime' }}
+
+jobs:
+  build-macos:
+    name: Build ${{ matrix.label }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-13
+            label: macOS Intel
+            artifact_name: breaktime-macos-intel
+            asset_suffix: macos-intel
+          - runner: macos-14
+            label: macOS Apple Silicon
+            artifact_name: breaktime-macos-apple-silicon
+            asset_suffix: macos-apple-silicon
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore cargo cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Package app bundle
+        run: |
+          chmod +x scripts/package-macos-app.sh
+          version="${GITHUB_REF_NAME#v}"
+          archive_path="dist/BreakTime-${GITHUB_REF_NAME}-${{ matrix.asset_suffix }}.app.zip"
+
+          APP_NAME="$APP_NAME" \
+            scripts/package-macos-app.sh \
+            "target/release/$BINARY_NAME" \
+            "$archive_path" \
+            "$BUNDLE_ID" \
+            "$version"
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/*.zip
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub release
+    runs-on: ubuntu-latest
+    needs: build-macos
+
+    steps:
+      - name: Download packaged apps
+        uses: actions/download-artifact@v4
+        with:
+          pattern: breaktime-macos-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true

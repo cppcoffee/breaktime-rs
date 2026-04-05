@@ -266,14 +266,9 @@ fn create_tray_icon(state: TrayIconState) -> Icon {
         progress,
     ) = match state {
         TrayIconState::Disabled => (110.0, 0.98, 0.9, 0.0, 0.0, 1.0),
-        TrayIconState::Counting { progress } => (
-            255.0,
-            1.0,
-            0.88,
-            1.0,
-            0.0,
-            progress.clamp(0.0, 1.0),
-        ),
+        TrayIconState::Counting { progress } => {
+            (255.0, 1.0, 0.88, 1.0, 0.0, progress.clamp(0.0, 1.0))
+        }
         TrayIconState::Alert => (255.0, 1.0, 0.92, 0.0, 1.0, 0.0),
     };
     let elapsed = (1.0 - progress).clamp(0.0, 1.0);
@@ -287,13 +282,9 @@ fn create_tray_icon(state: TrayIconState) -> Icon {
             let dist = (dx * dx + dy * dy).sqrt();
 
             let body = circle_stroke_intensity(dist, body_radius, body_stroke) * outline_weight;
-            let elapsed_fill = sector_fill_intensity(
-                dx,
-                dy,
-                dist,
-                elapsed_fill_radius,
-                elapsed * TAU,
-            ) * elapsed_fill_weight;
+            let elapsed_fill =
+                sector_fill_intensity(dx, dy, dist, elapsed_fill_radius, elapsed * TAU)
+                    * elapsed_fill_weight;
             let top_button = capsule_intensity(
                 px,
                 py,
@@ -312,9 +303,8 @@ fn create_tray_icon(state: TrayIconState) -> Icon {
                 center_y + 0.7,
                 0.7,
             ) * alert_weight;
-            let alert_dot =
-                circle_fill_intensity(distance(px, py, center_x, center_y + 3.2), 0.85)
-                    * alert_weight;
+            let alert_dot = circle_fill_intensity(distance(px, py, center_x, center_y + 3.2), 0.85)
+                * alert_weight;
 
             let intensity = body
                 .max(elapsed_fill)

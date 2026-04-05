@@ -107,9 +107,8 @@ impl BreakTimer {
     }
 
     pub fn tray_icon_step(&self, now: Instant) -> Option<u32> {
-        self.remaining(now).map(|(remaining, total_duration)| {
-            remaining_tray_icon_steps(remaining, total_duration)
-        })
+        self.remaining(now)
+            .map(|(remaining, total_duration)| remaining_tray_icon_steps(remaining, total_duration))
     }
 
     pub fn tray_icon_progress(&self, now: Instant) -> Option<f32> {
@@ -173,7 +172,7 @@ fn duration_from_minutes(minutes: u32) -> Duration {
 }
 
 fn ceil_seconds(duration: Duration) -> u32 {
-    ((duration.as_millis() + 999) / 1000) as u32
+    duration.as_millis().div_ceil(1000) as u32
 }
 
 fn next_tray_icon_wake(
@@ -186,8 +185,11 @@ fn next_tray_icon_wake(
     let exact_next_wake = if remaining_steps <= 1 {
         deadline
     } else {
-        let next_boundary_from_deadline =
-            duration_fraction(total_duration, u128::from(remaining_steps - 1), u128::from(tray_icon_total_steps()));
+        let next_boundary_from_deadline = duration_fraction(
+            total_duration,
+            u128::from(remaining_steps - 1),
+            u128::from(tray_icon_total_steps()),
+        );
         deadline - next_boundary_from_deadline
     };
 

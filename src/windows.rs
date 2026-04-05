@@ -341,9 +341,8 @@ fn position_countdown_bubble(panel: &NSPanel, tray_anchor: Option<NSRect>) {
         MainThreadMarker::new().expect("countdown bubble must be positioned on the main thread");
     let (target_screen, anchor_mid_x, anchor_bottom_y) = match tray_anchor {
         Some(anchor) => (
-            screen_for_rect(mtm, anchor).unwrap_or_else(|| {
-                NSScreen::mainScreen(mtm).unwrap_or_else(|| first_screen(mtm))
-            }),
+            screen_for_rect(mtm, anchor)
+                .unwrap_or_else(|| NSScreen::mainScreen(mtm).unwrap_or_else(|| first_screen(mtm))),
             Some(anchor.origin.x + anchor.size.width / 2.0),
             Some(anchor.origin.y),
         ),

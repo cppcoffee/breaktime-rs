@@ -49,6 +49,27 @@ After launch, the app appears in the macOS menu bar. The default state is disabl
 6. Click `+1 min` to postpone the current prompt by one minute.
 7. Click `Done` to dismiss the current prompt and start the next interval immediately.
 
+## CI And Releases
+
+This repository includes two GitHub Actions workflows:
+
+- `CI`: runs `cargo fmt --check`, `cargo clippy -- -D warnings`, and `cargo test` on every branch push and pull request
+- `Release`: when you push a tag matching `v*`, GitHub Actions builds macOS release artifacts and publishes them to a GitHub Release
+
+The release workflow uploads two runnable `.app.zip` bundles:
+
+- Apple Silicon: `BreakTime-vX.Y.Z-macos-apple-silicon.app.zip`
+- Intel: `BreakTime-vX.Y.Z-macos-intel.app.zip`
+
+To publish a release:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+If you want the generated app bundle to use your own bundle identifier, set the repository variable `BREAKTIME_BUNDLE_ID` in GitHub before pushing the tag. The workflow falls back to `com.example.breaktime` if the variable is not set.
+
 ## Current Limitations
 
 - macOS only
