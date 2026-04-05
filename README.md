@@ -1,9 +1,5 @@
 # BreakTime
 
-<p align="center">
-  <img src="assets/app-icon.svg" alt="BreakTime icon" width="128" height="128">
-</p>
-
 BreakTime is a lightweight macOS menu bar break reminder written in Rust. It lives in the system status bar, shows timer progress through the tray icon, and uses a two-stage reminder flow around the end of each countdown:
 
 - A floating countdown bubble appears near the menu bar during the final 10 seconds
