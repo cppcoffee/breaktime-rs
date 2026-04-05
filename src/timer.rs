@@ -1,7 +1,4 @@
-use std::{
-    f64::consts::PI,
-    time::{Duration, Instant},
-};
+use std::time::{Duration, Instant};
 
 use winit::event_loop::ControlFlow;
 
@@ -13,8 +10,7 @@ const BUBBLE_THRESHOLD: Duration = Duration::from_secs(10);
 const BUBBLE_REFRESH_INTERVAL: Duration = Duration::from_millis(200);
 const MIN_TRAY_ICON_WAKE_INTERVAL: Duration = Duration::from_secs(1);
 const SNOOZE_DURATION: Duration = Duration::from_secs(60);
-const TRAY_ICON_STEP_ANGLE_RADIANS: f64 = PI / 180.0;
-const TRAY_ICON_TOTAL_ANGLE_RADIANS: f64 = PI * 2.0;
+const TRAY_ICON_TOTAL_STEPS: u32 = 360;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TimerMode {
@@ -185,11 +181,8 @@ fn next_tray_icon_wake(
     let exact_next_wake = if remaining_steps <= 1 {
         deadline
     } else {
-        let next_boundary_from_deadline = duration_fraction(
-            total_duration,
-            u128::from(remaining_steps - 1),
-            u128::from(tray_icon_total_steps()),
-        );
+        let nanos = total_duration.as_nanos().saturating_mul(u128::from(remaining_steps - 1)) / u128::from(TRAY_ICON_TOTAL_STEPS);
+        let next_boundary_from_deadline = Duration::from_nanos(nanos.min(u128::from(u64::MAX)) as u64);
         deadline - next_boundary_from_deadline
     };
 
@@ -202,23 +195,8 @@ fn remaining_tray_icon_steps(remaining: Duration, total_duration: Duration) -> u
     if remaining.is_zero() {
         0
     } else {
-        ceil_div_u128(
-            remaining.as_nanos() * u128::from(tray_icon_total_steps()),
-            total_duration.as_nanos().max(1),
-        ) as u32
+        let value = remaining.as_nanos() * u128::from(TRAY_ICON_TOTAL_STEPS);
+        let divisor = total_duration.as_nanos().max(1);
+        value.div_ceil(divisor) as u32
     }
-}
-
-fn ceil_div_u128(value: u128, divisor: u128) -> u128 {
-    value.div_ceil(divisor)
-}
-
-fn duration_fraction(duration: Duration, numerator: u128, denominator: u128) -> Duration {
-    let nanos = duration.as_nanos().saturating_mul(numerator) / denominator.max(1);
-    Duration::from_nanos(nanos.min(u128::from(u64::MAX)) as u64)
-}
-
-fn tray_icon_total_steps() -> u32 {
-    // One icon step per degree: 2π / (π/180) = 360.
-    (TRAY_ICON_TOTAL_ANGLE_RADIANS / TRAY_ICON_STEP_ANGLE_RADIANS).round() as u32
 }

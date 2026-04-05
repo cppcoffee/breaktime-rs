@@ -313,9 +313,6 @@ fn create_tray_icon(state: TrayIconState) -> Icon {
                 .max(alert_dot);
             if intensity > 0.0 {
                 let index = ((y * size + x) * 4) as usize;
-                rgba[index] = 0;
-                rgba[index + 1] = 0;
-                rgba[index + 2] = 0;
                 rgba[index + 3] = (intensity * alpha_base) as u8;
             }
         }
@@ -384,8 +381,7 @@ fn distance(x0: f32, y0: f32, x1: f32, y1: f32) -> f32 {
 }
 
 fn normalized_angle_from_top(dx: f32, dy: f32) -> f32 {
-    let angle = dx.atan2(-dy);
-    if angle < 0.0 { angle + TAU } else { angle }
+    dx.atan2(-dy).rem_euclid(TAU)
 }
 
 fn soft_edge_alpha(signed_distance: f32, softness: f32) -> f32 {
