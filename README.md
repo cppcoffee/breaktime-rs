@@ -49,46 +49,6 @@ After launch, the app appears in the macOS menu bar. The default state is disabl
 6. Click `+1 min` to postpone the current prompt by one minute.
 7. Click `Done` to dismiss the current prompt and start the next interval immediately.
 
-## Development Notes
-
-The application is a native macOS app built around a `winit` event loop, with `tray-icon`, `objc2`, and `objc2-app-kit` used to drive AppKit components directly.
-
-Main modules:
-
-- `src/app.rs`: app lifecycle, event loop, and state synchronization
-- `src/menu.rs`: tray icon, menu structure, and custom controls
-- `src/windows.rs`: countdown bubble and break alert windows
-- `src/timer.rs`: timer logic, wake scheduling, and progress calculation
-- `src/actions.rs`: bridge layer from AppKit control callbacks to app events
-
-## Packaging
-
-The repository already includes macOS bundle metadata and app icon assets. After installing `cargo-bundle`, you can try packaging the app with:
-
-```bash
-cargo install cargo-bundle
-cargo bundle --release
-```
-
-Icon-related files:
-
-- `assets/app-icon.svg`: source icon artwork
-- `assets/app-icon.iconset/`: generated multi-size iconset assets
-- `assets/app-icon.icns`: macOS application icon
-- `scripts/generate_app_icon.sh`: regenerates the iconset and `.icns` file from the SVG
-
-After modifying the source icon, run:
-
-```bash
-zsh scripts/generate_app_icon.sh
-```
-
-## Verification
-
-```bash
-cargo check
-```
-
 ## Current Limitations
 
 - macOS only
