@@ -1,0 +1,13 @@
+[package]
+name = "breaktime"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tray-icon = "0.21.3"
+winit = "0.30.13"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6.4"
+objc2-app-kit = { version = "0.3.2", default-features = false, features = ["NSApplication", "NSButton", "NSCell", "NSColor", "NSControl", "NSFont", "NSGraphics", "NSMenu", "NSMenuItem", "NSPanel", "NSResponder", "NSScreen", "NSSlider", "NSSwitch", "NSStatusBarButton", "NSStatusItem", "NSText", "NSTextField", "NSView", "NSVisualEffectView", "NSWindow"] }
+objc2-foundation = { version = "0.3.2", default-features = false, features = ["NSArray", "NSGeometry", "NSObject", "NSString"] }
