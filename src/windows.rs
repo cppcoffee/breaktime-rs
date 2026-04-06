@@ -339,37 +339,36 @@ fn make_label(
 fn position_countdown_bubble(panel: &NSPanel, tray_anchor: Option<NSRect>) {
     let mtm =
         MainThreadMarker::new().expect("countdown bubble must be positioned on the main thread");
-    let (target_screen, anchor_mid_x, anchor_bottom_y) = match tray_anchor {
-        Some(anchor) => (
-            screen_for_rect(mtm, anchor)
-                .unwrap_or_else(|| NSScreen::mainScreen(mtm).unwrap_or_else(|| first_screen(mtm))),
-            Some(anchor.origin.x + anchor.size.width / 2.0),
-            Some(anchor.origin.y),
-        ),
-        None => (
-            NSScreen::mainScreen(mtm).unwrap_or_else(|| first_screen(mtm)),
-            None,
-            None,
-        ),
-    };
+
+    let target_screen = tray_anchor
+        .and_then(|anchor| screen_for_rect(mtm, anchor))
+        .unwrap_or_else(|| NSScreen::mainScreen(mtm).unwrap_or_else(|| first_screen(mtm)));
+
+    let anchor_mid_x = tray_anchor.map(|anchor| anchor.origin.x + anchor.size.width / 2.0);
+    let anchor_bottom_y = tray_anchor.map(|anchor| anchor.origin.y);
+
     let visible = target_screen.visibleFrame();
 
-    let x = if let Some(anchor_mid_x) = anchor_mid_x {
-        (anchor_mid_x - COUNTDOWN_BUBBLE_SIZE.width / 2.0).clamp(
-            visible.origin.x + SCREEN_MARGIN,
-            visible.origin.x + visible.size.width - COUNTDOWN_BUBBLE_SIZE.width - SCREEN_MARGIN,
-        )
-    } else {
-        visible.origin.x + visible.size.width - COUNTDOWN_BUBBLE_SIZE.width - SCREEN_MARGIN
-    };
-    let y = if let Some(anchor_bottom_y) = anchor_bottom_y {
-        (anchor_bottom_y - COUNTDOWN_BUBBLE_SIZE.height - TRAY_BUBBLE_GAP).clamp(
-            visible.origin.y + SCREEN_MARGIN,
-            visible.origin.y + visible.size.height - COUNTDOWN_BUBBLE_SIZE.height - SCREEN_MARGIN,
-        )
-    } else {
-        visible.origin.y + visible.size.height - COUNTDOWN_BUBBLE_SIZE.height - SCREEN_MARGIN
-    };
+    let x = anchor_mid_x.map_or(
+        visible.origin.x + visible.size.width - COUNTDOWN_BUBBLE_SIZE.width - SCREEN_MARGIN,
+        |mid_x| {
+            (mid_x - COUNTDOWN_BUBBLE_SIZE.width / 2.0).clamp(
+                visible.origin.x + SCREEN_MARGIN,
+                visible.origin.x + visible.size.width - COUNTDOWN_BUBBLE_SIZE.width - SCREEN_MARGIN,
+            )
+        },
+    );
+    let y = anchor_bottom_y.map_or(
+        visible.origin.y + visible.size.height - COUNTDOWN_BUBBLE_SIZE.height - SCREEN_MARGIN,
+        |bottom_y| {
+            (bottom_y - COUNTDOWN_BUBBLE_SIZE.height - TRAY_BUBBLE_GAP).clamp(
+                visible.origin.y + SCREEN_MARGIN,
+                visible.origin.y + visible.size.height
+                    - COUNTDOWN_BUBBLE_SIZE.height
+                    - SCREEN_MARGIN,
+            )
+        },
+    );
 
     panel.setFrame_display(NSRect::new(NSPoint::new(x, y), COUNTDOWN_BUBBLE_SIZE), true);
 }
